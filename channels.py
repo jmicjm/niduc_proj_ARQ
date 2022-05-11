@@ -1,4 +1,3 @@
-import binascii
 import numpy as np
 import random
 import commpy.channels as chan
@@ -10,31 +9,6 @@ def bec(input_data, p):
 
 def bsc(input_data, p):
     return chan.bsc(input_data, p)
-
-def gen_crc32(input_data):
-    return binascii.crc32(input_data)
-
-def gen_paritybit(input_8bit):
-    ones_count = 0
-    for i in range(8):
-        ones_count += input_8bit[i]
-    return ones_count % 2
-
-def add_crc32(input_data):
-    crc32 = gen_crc32(input_data)
-    return np.append(input_data, [int(x) for x in bin(crc32)[2:]])
-
-def add_paritybit(input_data):
-    output_data = np.empty(0,dtype=np.uint8)
-    for i in range(input_data.size // 8):
-        arr = input_data[i*8:i*8+8]
-        bit = gen_paritybit(arr)
-        output_data = np.append(output_data, arr)
-        output_data = np.append(output_data, bit)
-    return output_data
-
-def add_doubling(input_data):
-    return np.append(input_data, input_data)
 
 class Gilbert_channel:
     good = True
