@@ -22,7 +22,7 @@ class Gilbert_channel:
         self.bad_to_good_p = bad_to_good_p
 
     def change_state(self):
-        self.good = self.good ^ (random.uniform(0, 1) <= (
+        self.good = self.good ^ (random.uniform(0, 1) < (
             self.good_to_bad_p if self.good else self.bad_to_good_p))
 
     def propagate(self, input_data):
