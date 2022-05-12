@@ -15,3 +15,12 @@ print("doubling       ", add_doubling(data))
 print("crc32 verif    ", verify_and_decode_crc32(add_crc32(data)))
 print("parity verif   ", verify_and_decode_parity(add_paritybit(data)))
 print("doubling verif ", verify_and_decode_doubling(add_doubling(data)))
+wrong_crc32 = add_crc32(data)
+wrong_crc32[-1] = 0
+print("crc32 verif w  ", verify_and_decode_crc32(wrong_crc32))
+wrong_parity = add_paritybit(data)
+wrong_parity[-1] = 1
+print("parity verif w ", verify_and_decode_parity(wrong_parity))
+wrong_doubling = add_doubling(data)
+wrong_doubling[-1] = 1
+print("doubling verif ", verify_and_decode_doubling(wrong_doubling))
