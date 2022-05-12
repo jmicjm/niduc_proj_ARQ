@@ -1,5 +1,6 @@
 from channels import *
 from encoding import *
+from datagen import *
 import numpy as np
 
 data = np.array([0, 0, 0, 1, 1, 1, 1, 0])
@@ -24,3 +25,4 @@ print("parity verif w ", verify_and_decode_parity(wrong_parity))
 wrong_doubling = add_doubling(data)
 wrong_doubling[-1] = 1
 print("doubling verif ", verify_and_decode_doubling(wrong_doubling))
+print("random data pa ", gen_data_packet(2))
