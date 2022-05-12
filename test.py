@@ -36,7 +36,7 @@ def bsc_channel(data):
 
 
 def bec_channel(data):
-    return bec(data, 0.02)
+    return bec(data, 0.01)
 
 
 gilbert = Gilbert_channel(0, 0.5, 0.01, 0.4)
@@ -48,8 +48,14 @@ def gilbert_channel(data):
 transceiver  = Transceiver(
     Transmitter_params(add_crc32, 1, 10),
     Receiver_params(verify_and_decode_crc32, 10),
-    bec_channel,
-    10
+    bec_channel
     )
 
-transceiver.init_transaction()
+packet_count = 16
+stats = transceiver.init_transaction(10, packet_count)
+
+print("tried to sent: ", packet_count, " packets")
+print("received_correct: ", stats.received_correct(), " packets")
+print("received incorrect: ", stats.received_incorrect, " packets")
+print("verification successfull: ", stats.verification_successfull, " packets")
+print("verification unsuccessfull: ", stats.verification_unsuccessfull, " packets")
