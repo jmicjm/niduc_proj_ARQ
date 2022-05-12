@@ -1,4 +1,3 @@
-from bitarray.util import ba2int
 import binascii
 import numpy as np
 
@@ -28,7 +27,7 @@ def add_crc32(input_data):
 
 
 def add_paritybit(input_data):
-    output_data = empty_array
+    output_data = empty_array.copy()
     for i in range(0, input_data.size, 8):
         arr = input_data[i:i+8]
         bit = gen_paritybit(arr)
@@ -38,7 +37,7 @@ def add_paritybit(input_data):
 
 
 def add_doubling(input_data):
-    output_data = empty_array
+    output_data = empty_array.copy()
     for i in range(input_data.size):
         output_data = np.append(output_data, [input_data[i], input_data[i]])
     return output_data
@@ -55,38 +54,38 @@ def bit_arr_to_int(arr):
 
 def verify_and_decode_crc32(input_data):
     if input_data.size < 40:
-        return False, empty_array
+        return False, empty_array.copy()
 
     data_wo_checksum = input_data[:-32]
     checksum = input_data[-32:]
     if gen_crc32(data_wo_checksum) == bit_arr_to_int(checksum):
         return True, data_wo_checksum
     else:
-        return False, empty_array
+        return False, empty_array.copy()
 
 
 def verify_and_decode_parity(input_data):
     if input_data.size % 9 != 0:
-        return False, empty_array
+        return False, empty_array.copy()
 
-    output_data = empty_array
+    output_data = empty_array.copy()
     for i in range(0, input_data.size, 9):
         data = input_data[i:i+8]
         parity = input_data[i+8]
         if gen_paritybit(data) != parity:
-            return False, empty_array
+            return False, empty_array.copy()
         output_data = np.append(output_data, data)
     return True, output_data
 
 
 def verify_and_decode_doubling(input_data):
     if input_data.size % 2 != 0:
-        return False, empty_array
+        return False, empty_array.copy()
 
-    output_data = empty_array
+    output_data = empty_array.copy()
     for i in range(0, input_data.size, 2):
         if input_data[i] != input_data[i+1]:
-            return False, empty_array
+            return False, empty_array.copy()
         else:
             output_data = np.append(output_data, input_data[i])
 

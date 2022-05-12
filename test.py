@@ -1,8 +1,9 @@
+import numpy as np
+
 from channels import *
 from encoding import *
 from datagen import *
 from transceiver import *
-import numpy as np
 
 data = np.array([0, 0, 0, 1, 1, 1, 1, 0])
 print("data   ", data)
@@ -30,14 +31,22 @@ print("random data pa ", gen_data_packet(2))
 
 print("===transceiver test===")
 
+
 def bsc_channel(data):
     return bsc(data, 0.01)
 
+
 def bec_channel(data):
-    return bec(data, 0.2)
+    return bec(data, 0.02)
+
 
 gilbert = Gilbert_channel(0, 0.5, 0.01, 0.4)
+
+
 def gilbert_channel(data):
     return gilbert.propagate(data)
 
-init_transaction(add_crc32, verify_and_decode_crc32, gilbert_channel)
+
+init_transaction(add_crc32, verify_and_decode_crc32, bec_channel)
+init_transaction(add_paritybit, verify_and_decode_parity, bsc_channel)
+init_transaction(add_doubling, verify_and_decode_doubling, gilbert_channel)
