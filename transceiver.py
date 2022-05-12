@@ -25,12 +25,12 @@ def receiver_thread(data_queue, event, decoding_function):
             print("Received incorrect data")
 
 
-def transmitter_thread(data_queue, event, timeout, retry_count, data, encoding_function):
+def transmitter_thread(data_queue, event, timeout, retry_count, data, encoding_function, channel_propagation_function):
     flag = False
 
     while flag != True and retry_count > 0:
         encoded_data=encoding_function(data)
-        data_queue.put(encoded_data)
+        data_queue.put(channel_propagation_function(encoded_data))
 
         flag = event.wait(timeout)
         if flag:
@@ -40,18 +40,15 @@ def transmitter_thread(data_queue, event, timeout, retry_count, data, encoding_f
             retry_count -= 1
 
 
-def init_transaction():
+def init_transaction(encoding_function, decoding_function, channel_propagation_function):
     data = gen_data_packet(10)
     data_queue = queue.Queue()
 
     event = threading.Event()
     trans_thread = threading.Thread(
-        target=transmitter_thread, args=(data_queue, event, 1, 10, data, add_crc32))
+        target=transmitter_thread, args=(data_queue, event, 1, 10, data, encoding_function, channel_propagation_function))
     recv_thread = threading.Thread(
-        target=receiver_thread, args=(data_queue, event, verify_and_decode_crc32))
+        target=receiver_thread, args=(data_queue, event, decoding_function))
 
     recv_thread.start()
     trans_thread.start()
-
-
-init_transaction()

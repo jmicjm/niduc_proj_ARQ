@@ -1,6 +1,7 @@
 from channels import *
 from encoding import *
 from datagen import *
+from transceiver import *
 import numpy as np
 
 data = np.array([0, 0, 0, 1, 1, 1, 1, 0])
@@ -26,3 +27,17 @@ wrong_doubling = add_doubling(data)
 wrong_doubling[-1] = 1
 print("doubling verif ", verify_and_decode_doubling(wrong_doubling))
 print("random data pa ", gen_data_packet(2))
+
+print("===transceiver test===")
+
+def bsc_channel(data):
+    return bsc(data, 0.01)
+
+def bec_channel(data):
+    return bec(data, 0.2)
+
+gilbert = Gilbert_channel(0, 0.5, 0.01, 0.4)
+def gilbert_channel(data):
+    return gilbert.propagate(data)
+
+init_transaction(add_crc32, verify_and_decode_crc32, gilbert_channel)
