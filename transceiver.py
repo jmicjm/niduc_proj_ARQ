@@ -7,11 +7,12 @@ from encoding import *
 from datagen import *
 
 
-def receiver_thread(queue, event):
+def receiver_thread(data_queue, event):
     while True:
         try:
-            data = queue.get(True, 10)
+            data = data_queue.get(True, 1)
         except queue.Empty:
+            print("Queue is empty, returning...")
             return
 
         result, data = verify_and_decode_crc32(data)
@@ -24,11 +25,11 @@ def receiver_thread(queue, event):
             print("Received incorrect data")
 
 
-def transmitter_thread(queue, event, timeout, retry_count, encoded_data):
+def transmitter_thread(data_queue, event, timeout, retry_count, encoded_data):
     flag = False
 
-    while flag != True:
-        queue.put(encoded_data)
+    while flag != True and retry_count > 0:
+        data_queue.put(encoded_data)
 
         flag = event.wait(timeout)
         if flag:
