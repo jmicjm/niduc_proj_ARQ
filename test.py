@@ -31,7 +31,6 @@ print("random data pa ", gen_data_packet(2))
 
 print("===transceiver test===")
 
-
 def bsc_channel(data):
     return bsc(data, 0.01)
 
@@ -46,7 +45,11 @@ gilbert = Gilbert_channel(0, 0.5, 0.01, 0.4)
 def gilbert_channel(data):
     return gilbert.propagate(data)
 
+transceiver  = Transceiver(
+    Transmitter_params(add_crc32, 1, 10),
+    Receiver_params(verify_and_decode_crc32, 10),
+    bec_channel,
+    10
+    )
 
-init_transaction(add_crc32, verify_and_decode_crc32, bec_channel)
-init_transaction(add_paritybit, verify_and_decode_parity, bsc_channel)
-init_transaction(add_doubling, verify_and_decode_doubling, gilbert_channel)
+transceiver.init_transaction()

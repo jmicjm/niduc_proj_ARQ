@@ -18,16 +18,21 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-def receiver_thread(data_queue, event, timeout, decoding_function, data_verif):
+class Receiver_params:
+    def __init__(self, decoding_function, timeout):
+        self.decoding_function = decoding_function
+        self.timeout = timeout
+
+def receiver_thread(params, data_queue, event, data_verif):
     while True:
         try:
-            data = data_queue.get(True, timeout)
+            data = data_queue.get(True, params.timeout)
         except queue.Empty:
             print(
                 bcolors.FAIL + "Receiver: Waiting for data timeout, returning..." + bcolors.ENDC)
             return
 
-        result, data = decoding_function(data)
+        result, data = params.decoding_function(data)
         if result:
             print(bcolors.OKCYAN + "Receiver: Correct data received..." + bcolors.ENDC)
             if np.array_equal(data_verif, data):
@@ -43,34 +48,50 @@ def receiver_thread(data_queue, event, timeout, decoding_function, data_verif):
             print(bcolors.OKCYAN + "Receiver: Received incorrect data" + bcolors.ENDC)
 
 
-def transmitter_thread(data_queue, event, timeout, retry_count, data, encoding_function, channel_propagation_function):
+class Transmitter_params:
+    def __init__(self, encoding_function, timeout, retry_count):
+        self.encoding_function = encoding_function
+        self.timeout = timeout
+        self.retry_count = retry_count
+
+def transmitter_thread(params, data_queue, event, data, channel_propagation_function):
     flag = False
 
-    while flag != True and retry_count > 0:
-        encoded_data = encoding_function(data)
+    while flag != True and params.retry_count > 0:
+        encoded_data = params.encoding_function(data)
         print(bcolors.WARNING + "Transmitter: sending data" + bcolors.ENDC)
         data_queue.put(channel_propagation_function(encoded_data))
 
-        flag = event.wait(timeout)
+        flag = event.wait(params.timeout)
         if flag:
             print(bcolors.WARNING + "Transmitter: got ACK" + bcolors.ENDC)
         else:
             print(bcolors.WARNING + "Transmitter: NACK, resend..." + bcolors.ENDC)
-            retry_count -= 1
-    if retry_count == 0:
+            params.retry_count -= 1
+    if params.retry_count == 0:
         print(bcolors.FAIL +
               "Transmitter: Too many retries, channel is unusable, exiting" + bcolors.ENDC)
 
 
-def init_transaction(encoding_function, decoding_function, channel_propagation_function):
-    data = gen_data_packet(10)
-    data_queue = queue.Queue()
+class Transceiver:
+    def __init__(self, transmitter_params, receiver_params, channel_propagation_function, packet_size):
+        self.transmitter_params = transmitter_params
+        self.receiver_params = receiver_params
+        self.channel_propagation_function = channel_propagation_function
+        self.packet_size = packet_size
 
-    event = threading.Event()
-    trans_thread = threading.Thread(
-        target=transmitter_thread, args=(data_queue, event, 1, 10, data, encoding_function, channel_propagation_function))
-    recv_thread = threading.Thread(
-        target=receiver_thread, args=(data_queue, event, 2, decoding_function, data))
+    def init_transaction(self):
+        data = gen_data_packet(self.packet_size)
+        data_queue = queue.Queue()
 
-    recv_thread.start()
-    trans_thread.start()
+        event = threading.Event()
+        trans_thread = threading.Thread(
+            target=transmitter_thread, args=(self.transmitter_params, data_queue, event,  data, self.channel_propagation_function))
+        recv_thread = threading.Thread(
+            target=receiver_thread, args=(self.receiver_params, data_queue, event,  data))
+
+        recv_thread.start()
+        trans_thread.start()
+
+        recv_thread.join()
+        trans_thread.join()
