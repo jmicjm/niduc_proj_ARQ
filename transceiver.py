@@ -7,7 +7,7 @@ from encoding import *
 from datagen import *
 
 
-def receiver_thread(data_queue, event):
+def receiver_thread(data_queue, event, decoding_function):
     while True:
         try:
             data = data_queue.get(True, 1)
@@ -15,7 +15,7 @@ def receiver_thread(data_queue, event):
             print("Queue is empty, returning...")
             return
 
-        result, data = verify_and_decode_crc32(data)
+        result, data = decoding_function(data)
         if result:
             event.set()
             print("Received correct data:")
@@ -25,10 +25,11 @@ def receiver_thread(data_queue, event):
             print("Received incorrect data")
 
 
-def transmitter_thread(data_queue, event, timeout, retry_count, encoded_data):
+def transmitter_thread(data_queue, event, timeout, retry_count, data, encoding_function):
     flag = False
 
     while flag != True and retry_count > 0:
+        encoded_data=encoding_function(data)
         data_queue.put(encoded_data)
 
         flag = event.wait(timeout)
@@ -41,14 +42,13 @@ def transmitter_thread(data_queue, event, timeout, retry_count, encoded_data):
 
 def init_transaction():
     data = gen_data_packet(10)
-    encoded_data = add_crc32(data)
     data_queue = queue.Queue()
 
     event = threading.Event()
     trans_thread = threading.Thread(
-        target=transmitter_thread, args=(data_queue, event, 1, 10, encoded_data))
+        target=transmitter_thread, args=(data_queue, event, 1, 10, data, add_crc32))
     recv_thread = threading.Thread(
-        target=receiver_thread, args=(data_queue, event))
+        target=receiver_thread, args=(data_queue, event, verify_and_decode_crc32))
 
     recv_thread.start()
     trans_thread.start()
