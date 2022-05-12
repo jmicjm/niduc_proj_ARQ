@@ -54,6 +54,9 @@ def bit_arr_to_int(arr):
 
 
 def verify_and_decode_crc32(input_data):
+    if input_data.size < 40:
+        return False, empty_array
+
     data_wo_checksum = input_data[:-32]
     checksum = input_data[-32:]
     if gen_crc32(data_wo_checksum) == bit_arr_to_int(checksum):
@@ -63,6 +66,9 @@ def verify_and_decode_crc32(input_data):
 
 
 def verify_and_decode_parity(input_data):
+    if input_data.size % 9 != 0:
+        return False, empty_array
+
     output_data = empty_array
     for i in range(0, input_data.size, 9):
         data = input_data[i:i+8]
