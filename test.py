@@ -57,4 +57,4 @@ transceiver = Transceiver(
 packet_count = 16
 stats = transceiver.init_transaction(10, packet_count)
 
-stats.print()
+stats.print(packet_count)
