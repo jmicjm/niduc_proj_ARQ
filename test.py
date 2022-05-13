@@ -50,11 +50,11 @@ def gilbert_channel(data):
 
 transceiver = Transceiver(
     Transmitter_params(add_crc32, 1, 10),
-    Receiver_params(verify_and_decode_crc32, 10),
+    Receiver_params(verify_and_decode_crc32, 2),
     bec_channel
 )
 
 packet_count = 16
 stats = transceiver.init_transaction(10, packet_count)
 
-stats.print(packet_count)
+stats.print()

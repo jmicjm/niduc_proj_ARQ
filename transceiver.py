@@ -89,6 +89,7 @@ class Transceiver:
 
     def init_transaction(self, packet_size, packet_count):
         stats = Transaction_stats()
+        stats.expected_correct_count = packet_count
         data_queue = queue.Queue()
 
         for i in range(packet_count):
