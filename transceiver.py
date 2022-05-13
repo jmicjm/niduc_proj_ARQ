@@ -4,46 +4,30 @@ import queue
 from channels import *
 from encoding import *
 from datagen import *
-
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+from colors import *
+from trans_stats import *
 
 
 class Validator:
     def __init__(self, original_data):
         self.original_data = original_data
-    
+
     def validate(self, data):
         if np.array_equal(self.original_data, data):
             print(bcolors.OKCYAN +
-                    "Validator: Data verification successful" + bcolors.OKGREEN)
+                  "Validator: Data verification successful" + bcolors.OKGREEN)
             return True
         else:
             print(bcolors.FAIL +
-                    "Validator: Data verification failed" + bcolors.FAIL)
+                  "Validator: Data verification failed" + bcolors.FAIL)
             return False
 
-class Transaction_stats:
-    received_incorrect = 0
-    verification_successfull = 0
-    verification_unsuccessfull = 0
-
-    def received_correct(self):
-        return self.verification_successfull + self.verification_unsuccessfull
 
 class Receiver_params:
     def __init__(self, decoding_function, timeout):
         self.decoding_function = decoding_function
         self.timeout = timeout
+
 
 def receiver_thread(params, data_queue, event, verificator, stats):
     while True:
@@ -69,11 +53,13 @@ def receiver_thread(params, data_queue, event, verificator, stats):
             print(bcolors.OKCYAN + "Receiver: Received incorrect data" + bcolors.ENDC)
             stats.received_incorrect += 1
 
+
 class Transmitter_params:
     def __init__(self, encoding_function, timeout, retry_count):
         self.encoding_function = encoding_function
         self.timeout = timeout
         self.retry_count = retry_count
+
 
 def transmitter_thread(params, data_queue, event, data, channel_propagation_function):
     flag = False

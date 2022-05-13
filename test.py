@@ -4,6 +4,7 @@ from channels import *
 from encoding import *
 from datagen import *
 from transceiver import *
+from colors import *
 
 data = np.array([0, 0, 0, 1, 1, 1, 1, 0])
 print("data   ", data)
@@ -31,6 +32,7 @@ print("random data pa ", gen_data_packet(2))
 
 print("===transceiver test===")
 
+
 def bsc_channel(data):
     return bsc(data, 0.01)
 
@@ -45,17 +47,14 @@ gilbert = Gilbert_channel(0, 0.5, 0.01, 0.4)
 def gilbert_channel(data):
     return gilbert.propagate(data)
 
-transceiver  = Transceiver(
+
+transceiver = Transceiver(
     Transmitter_params(add_crc32, 1, 10),
     Receiver_params(verify_and_decode_crc32, 10),
     bec_channel
-    )
+)
 
 packet_count = 16
 stats = transceiver.init_transaction(10, packet_count)
 
-print("tried to sent: ", packet_count, " packets")
-print("received_correct: ", stats.received_correct(), " packets")
-print("received incorrect: ", stats.received_incorrect, " packets")
-print("verification successfull: ", stats.verification_successfull, " packets")
-print("verification unsuccessfull: ", stats.verification_unsuccessfull, " packets")
+stats.print()
