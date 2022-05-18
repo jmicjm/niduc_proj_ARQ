@@ -5,6 +5,7 @@ from encoding import *
 from datagen import *
 from transceiver import *
 from colors import *
+from checksum_bench import *
 
 data = np.array([0, 0, 0, 1, 1, 1, 1, 0])
 print("data   ", data)
@@ -46,6 +47,11 @@ gilbert = Gilbert_channel(0, 0.5, 0.01, 0.4)
 
 def gilbert_channel(data):
     return gilbert.propagate(data)
+
+
+bench(add_paritybit, verify_and_decode_parity, bsc_channel, 1e3, 32, 10, "parity.txt")
+bench(add_doubling, verify_and_decode_doubling, bsc_channel, 1e3, 32, 10, "doubling.txt")
+bench(add_crc32, verify_and_decode_crc32, bsc_channel, -1, 32, 10, "crc32.txt")
 
 
 transceiver = Transceiver(
