@@ -35,7 +35,7 @@ print("===transceiver test===")
 
 
 def bsc_channel(data):
-    return bsc(data, 0.01)
+    return bsc(data, 0.001)
 
 
 def bec_channel(data):
@@ -49,9 +49,18 @@ def gilbert_channel(data):
     return gilbert.propagate(data)
 
 
-bench(add_paritybit, verify_and_decode_parity, bsc_channel, 1e3, 32, 10, "parity.txt")
-bench(add_doubling, verify_and_decode_doubling, bsc_channel, 1e3, 32, 10, "doubling.txt")
-bench(add_crc32, verify_and_decode_crc32, bsc_channel, -1, 32, 10, "crc32.txt")
+bench(
+    add_paritybit,
+    verify_and_decode_parity, 
+    bsc_channel, 
+    1e6, 
+    8, 
+    1e3,
+    10, 
+    0.1,
+    50,
+    "parity"
+)
 
 
 transceiver = Transceiver(
