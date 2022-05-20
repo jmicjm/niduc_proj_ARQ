@@ -26,6 +26,7 @@ def bench(
     transmission_count = 0
     retransmission_limit_hit_count = 0
 
+    collision_log_file = open(description+"_collisions.txt", 'w')
     csv_file = open(description+".csv", 'w').close()
     csv_file = open(description+".csv", 'a')
     csv_file.write("packet_count;packet_size;transmission_count;checksum_mismatch_count;checksum_collision_count;retransmission_limit_hit_count\n")
@@ -54,6 +55,8 @@ def bench(
             else:
                 if not np.array_equal(data, decoded_data):
                     checksum_collision_count += 1
+                    collision_log_file.write(f'sent:     {np.array2string(data, threshold=packet_size*8, separator="", max_line_width=packet_size*8+2)}\n'\
+                                             f'received: {np.array2string(decoded_data, threshold=packet_size*8, separator="", max_line_width=packet_size*8+2)}\n\n')
                 break
 
             retransmission_count += 1
@@ -80,3 +83,4 @@ def bench(
     
     print_stats()
     csv_file.close()
+    collision_log_file.close()
